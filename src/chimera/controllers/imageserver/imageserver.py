@@ -85,6 +85,13 @@ class ImageServer(ChimeraObject):
 
     def register(self, image):
         try:
+            if len(self.imagesByID) > self['max_images']:
+                for item in self.imagesByID:
+                    self.log.debug('Unregistering image %s' % item)
+                    self.unregister(self.imagesByID[item])
+                    if len(self.imagesByID) < self['max_images']:
+                        break
+
             if "CHM_ID" in image:
                 image.setGUID(image["CHM_ID"])
             else:
