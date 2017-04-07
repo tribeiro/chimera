@@ -22,7 +22,9 @@ class ImageServer(ChimeraObject):
 
         'httpd': True,
         'http_host': 'default',
-        'http_port': 7669}
+        'http_port': 7669,
+        'max_images': 10,
+    }
 
     def __init__(self):
         ChimeraObject.__init__(self)
@@ -46,6 +48,8 @@ class ImageServer(ChimeraObject):
             loaddir = os.path.realpath(loaddir)
             self._loadImageDir(loaddir)
 
+        self.setHz(0.1)
+
     def __stop__(self):
 
         if self["httpd"]:
@@ -53,6 +57,16 @@ class ImageServer(ChimeraObject):
 
         for image in self.imagesByID.values():
             self.unregister(image)
+
+    def control(self):
+        self.log.debug('[control] Checking image server list. Maximum %i/%i' % (len(self.imagesByID),
+                                                                                self['max_images']))
+        if len(self.imagesByID) > self['max_images']:
+            for item in self.imagesByID:
+                self.log.debug('Unregistering image %s' % item)
+                self.unregister(self.imagesByID[item])
+                if len(self.imagesByID) < self['max_images']:
+                    break
 
     def _loadImageDir(self, dir):
 
