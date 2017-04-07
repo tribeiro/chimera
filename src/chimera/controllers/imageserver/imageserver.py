@@ -86,7 +86,11 @@ class ImageServer(ChimeraObject):
     def register(self, image):
         try:
             if len(self.imagesByID) > self['max_images']:
+                remove_items = []
                 for item in self.imagesByID:
+                    remove_items.append(item)
+                    
+                for item in remove_items:
                     self.log.debug('Unregistering image %s' % item)
                     self.unregister(self.imagesByID[item])
                     if len(self.imagesByID) < self['max_images']:
