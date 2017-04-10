@@ -7,6 +7,7 @@ import Pyro.util
 
 import os
 
+from collections import OrderedDict
 
 class ImageServer(ChimeraObject):
 
@@ -29,8 +30,8 @@ class ImageServer(ChimeraObject):
     def __init__(self):
         ChimeraObject.__init__(self)
 
-        self.imagesByID = {}
-        self.imagesByPath = {}
+        self.imagesByID = OrderedDict()
+        self.imagesByPath = OrderedDict()
 
     def __start__(self):
 
@@ -86,15 +87,11 @@ class ImageServer(ChimeraObject):
     def register(self, image):
         try:
             if len(self.imagesByID) > self['max_images']:
-                remove_items = []
-                for item in self.imagesByID:
-                    remove_items.append(item)
-                    
+                remove_items = self.imagesByID.keys()[:len(self.imagesByID)-self['max_images']]
+
                 for item in remove_items:
                     self.log.debug('Unregistering image %s' % item)
                     self.unregister(self.imagesByID[item])
-                    if len(self.imagesByID) < self['max_images']:
-                        break
 
             if "CHM_ID" in image:
                 image.setGUID(image["CHM_ID"])
